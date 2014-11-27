@@ -7,7 +7,7 @@ using Common;
 
 namespace SignalRSelfHost.Hubs.Ticker
 {
-    public interface ITickerHubPublisher
+    public interface ITickerPublisher
     {
         void Start();
         void Stop();

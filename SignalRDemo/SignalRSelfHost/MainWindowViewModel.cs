@@ -16,19 +16,19 @@ namespace SignalRSelfHost
     {
         private const string Address = "http://localhost:5263";
         
-        private readonly ITickerHubPublisher tickerHubPublisher;
+        private readonly ITickerPublisher m_tickerPublisher;
         private static readonly ILog Log = LogManager.GetLogger(typeof(MainWindowViewModel));
         private IDisposable signalr;
 
-        public MainWindowViewModel(ITickerHubPublisher tickerHubPublisher)
+        public MainWindowViewModel(ITickerPublisher m_tickerPublisher)
         {
-            this.tickerHubPublisher = tickerHubPublisher;
+            this.m_tickerPublisher = m_tickerPublisher;
 
-            AutoTickerStartCommand = new DelegateCommand(tickerHubPublisher.Start);
-            AutoTickerStopCommand = new DelegateCommand(tickerHubPublisher.Stop);
+            AutoTickerStartCommand = new DelegateCommand(m_tickerPublisher.Start);
+            AutoTickerStopCommand = new DelegateCommand(m_tickerPublisher.Stop);
             SendOneTickerCommand = new DelegateCommand(async () =>
             {
-                await tickerHubPublisher.SendOneManualFakeTicker();
+                await m_tickerPublisher.SendOneManualFakeTicker();
             });
             StartCommand = new DelegateCommand(StartServer);
             StopCommand = new DelegateCommand(StopServer);

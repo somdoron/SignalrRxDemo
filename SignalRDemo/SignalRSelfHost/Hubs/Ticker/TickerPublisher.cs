@@ -10,16 +10,16 @@ using Microsoft.AspNet.SignalR;
 
 namespace SignalRSelfHost.Hubs.Ticker
 {
-    public class TickerHubPublisher : ITickerHubPublisher
+    public class TickerPublisher : ITickerPublisher
     {
         private readonly IContextHolder contextHolder;
         private readonly ITickerRepository tickerRepository;
         Random rand = new Random();
-        private static readonly ILog Log = LogManager.GetLogger(typeof(TickerHubPublisher));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(TickerPublisher));
         private bool tickerAutoRunning = false;
 
 
-        public TickerHubPublisher(IContextHolder contextHolder,
+        public TickerPublisher(IContextHolder contextHolder,
             ITickerRepository tickerRepository)
         {
             this.contextHolder = contextHolder;

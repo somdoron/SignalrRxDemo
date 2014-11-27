@@ -14,17 +14,17 @@ namespace SignalRSelfHost.IOC
         public IContainer Build()
         {
             var builder = new ContainerBuilder();
-
           
+            // SingalR
+            //builder.RegisterType<TickerPublisher>().As<ITickerPublisher>().SingleInstance();
+            //builder.RegisterType<TickerHub>().SingleInstance();
+            //builder.RegisterType<ContextHolder>().As<IContextHolder>().SingleInstance();
 
-            // ticker
-            builder.RegisterType<TickerHubPublisher>().As<ITickerHubPublisher>().SingleInstance();
-            builder.RegisterType<TickerHub>().SingleInstance();
-            builder.RegisterType<ContextHolder>().As<IContextHolder>().SingleInstance();
+            // NetMQ
+            builder.RegisterType<NetMQPublisher>().As<ITickerPublisher>().SingleInstance();
 
 
-
-           builder.RegisterType<TickerRepository>().As<ITickerRepository>().SingleInstance();
+            builder.RegisterType<TickerRepository>().As<ITickerRepository>().SingleInstance();
 
             // UI
             builder.RegisterType<MainWindow>().SingleInstance();
