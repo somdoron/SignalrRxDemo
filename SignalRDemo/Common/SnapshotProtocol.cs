@@ -9,7 +9,7 @@ namespace Common
     public static class SnapshotProtocol
     {
         public const string GetTradessCommand = "GT";
-
         public const string EndOfTickers = "~~~EOT";
+        public const int Port = 5264;
     }
 }

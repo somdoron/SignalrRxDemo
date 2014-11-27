@@ -13,8 +13,7 @@ namespace SignalRSelfHost.Ticker
 {
     public class NetMQPublisher : ITickerPublisher
     {
-        private const string PublishTicker = "P";
-        private const int Port = 5263;
+        private const string PublishTicker = "P";        
 
         public class ShimHandler : IShimHandler<object>
         {
@@ -38,10 +37,10 @@ namespace SignalRSelfHost.Ticker
             public void RunPipeline(PairSocket shim)
             {
                 publisherSocket = context.CreatePublisherSocket();
-                publisherSocket.Bind("tcp://*:" + Port);
+                publisherSocket.Bind("tcp://*:" + StreamingProtocol.Port);
 
                 snapshotSocket = context.CreateResponseSocket();
-                snapshotSocket.Bind("tcp://*:" + Port + 1);
+                snapshotSocket.Bind("tcp://*:" + SnapshotProtocol.Port);
                 snapshotSocket.ReceiveReady += OnSnapshotReady;
                 
                 shim.ReceiveReady += OnShimReady;
@@ -118,7 +117,7 @@ namespace SignalRSelfHost.Ticker
         {
             actor.
                 SendMore(PublishTicker).
-                SendMore("Trades").
+                SendMore(StreamingProtocol.TradesTopic).
                 SendMore(ticker.Name).
                 Send(ticker.Price.ToString());
         }
