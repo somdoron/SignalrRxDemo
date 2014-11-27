@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
-using SignalRSelfHost.Hubs;
-using SignalRSelfHost.Hubs.Ticker;
+using NetMQ;
+using SignalRSelfHost.Ticker;
 
 namespace SignalRSelfHost.IOC
 {
@@ -15,12 +15,9 @@ namespace SignalRSelfHost.IOC
         {
             var builder = new ContainerBuilder();
           
-            // SingalR
-            //builder.RegisterType<TickerPublisher>().As<ITickerPublisher>().SingleInstance();
-            //builder.RegisterType<TickerHub>().SingleInstance();
-            //builder.RegisterType<ContextHolder>().As<IContextHolder>().SingleInstance();
-
+            
             // NetMQ
+            builder.RegisterInstance(NetMQContext.Create()).SingleInstance();
             builder.RegisterType<NetMQPublisher>().As<ITickerPublisher>().SingleInstance();
 
 

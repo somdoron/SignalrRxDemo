@@ -7,17 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Autofac;
-using Microsoft.Owin;
-using SignalRSelfHost.Hubs;
-using SignalRSelfHost.Hubs.Ticker;
+using SignalRSelfHost.Ticker;
 using SignalRSelfHost.IOC;
 using log4net;
 
-
-[assembly: OwinStartup(typeof(Startup))]
 namespace SignalRSelfHost
-{
- 
+{ 
     public partial class App : Application
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(App));
@@ -43,10 +38,7 @@ namespace SignalRSelfHost
             mainWindow.DataContext = vm;
             vm.Start();
             mainWindow.Show();
-
-
         }
-
 
         private void InitializeLogging()
         {

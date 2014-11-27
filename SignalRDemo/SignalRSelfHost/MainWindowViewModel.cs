@@ -2,34 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Common.ViewModels;
 using log4net;
-using Microsoft.Owin.BuilderProperties;
-using Microsoft.Owin.Hosting;
-using SignalRSelfHost.Hubs.Ticker;
+using SignalRSelfHost.Ticker;
 
 namespace SignalRSelfHost
 {
     public class MainWindowViewModel : IMainWindowViewModel
-    {
-        private const string Address = "http://localhost:5263";
-        
-        private readonly ITickerPublisher m_tickerPublisher;
+    {                
+        private readonly ITickerPublisher tickerPublisher;
+        private readonly ITickerRepository tickerRepository;
+        private Random rand;
         private static readonly ILog Log = LogManager.GetLogger(typeof(MainWindowViewModel));
-        private IDisposable signalr;
+        private CancellationTokenSource autoRunningCancellationToken;
 
-        public MainWindowViewModel(ITickerPublisher m_tickerPublisher)
+
+        public MainWindowViewModel(ITickerPublisher tickerPublisher, ITickerRepository tickerRepository)
         {
-            this.m_tickerPublisher = m_tickerPublisher;
+            this.tickerPublisher = tickerPublisher;
+            this.tickerRepository = tickerRepository;
+            this.rand = new Random();
 
-            AutoTickerStartCommand = new DelegateCommand(m_tickerPublisher.Start);
-            AutoTickerStopCommand = new DelegateCommand(m_tickerPublisher.Stop);
-            SendOneTickerCommand = new DelegateCommand(async () =>
+            AutoTickerStartCommand = new DelegateCommand(AutoRunning);
+            AutoTickerStopCommand = new DelegateCommand(() => 
             {
-                await m_tickerPublisher.SendOneManualFakeTicker();
+                if (autoRunningCancellationToken != null)
+                {
+                    autoRunningCancellationToken.Cancel();
+                }                    
             });
+            SendOneTickerCommand = new DelegateCommand(SendOneManualFakeTicker);
             StartCommand = new DelegateCommand(StartServer);
             StopCommand = new DelegateCommand(StopServer);
         }
@@ -42,37 +47,51 @@ namespace SignalRSelfHost
 
         public void Start()
         {
-            StartServer();
-
-           
+            StartServer();           
         }
-       
 
+        private void AutoRunning()
+        {
+            autoRunningCancellationToken = new CancellationTokenSource();
+            Task.Run(async () =>
+            {
+                while (!autoRunningCancellationToken.IsCancellationRequested)
+                {
+                    SendOneManualFakeTicker();
 
+                    await Task.Delay(20);
+                }
+            });
+        }
+
+        private void SendOneManualFakeTicker()
+        {
+            var currentTicker = tickerRepository.GetNextTicker();
+
+            var flipPoint = rand.Next(0, 100);
+
+            if (flipPoint > 50)
+            {
+                currentTicker.Price += currentTicker.Price/30;
+            }
+            else
+            {
+                currentTicker.Price -= currentTicker.Price/30;
+            }
+
+            tickerRepository.StoreTicker(currentTicker);
+
+            tickerPublisher.PublishTrade(currentTicker);
+        }
 
         private void StartServer()
         {
-
-            try
-            {
-                signalr = WebApp.Start(Address);
-            }
-            catch (Exception exception)
-            {
-                Log.Error("An error occurred while starting SignalR", exception);
-            }
+            tickerPublisher.Start();            
         }
-
 
         private void StopServer()
         {
-            if (signalr != null)
-            {
-                signalr.Dispose();
-                signalr = null;
-            }
-
+            tickerPublisher.Start();
         }
-
     }
 }

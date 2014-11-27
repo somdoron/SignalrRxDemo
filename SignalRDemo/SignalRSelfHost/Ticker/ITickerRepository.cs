@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 
-namespace SignalRSelfHost.Hubs.Ticker
+namespace SignalRSelfHost.Ticker
 {
     public interface ITickerRepository
     {

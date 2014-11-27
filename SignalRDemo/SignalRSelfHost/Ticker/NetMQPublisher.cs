@@ -8,15 +8,13 @@ using NetMQ;
 using NetMQ.Actors;
 using NetMQ.InProcActors;
 using NetMQ.Sockets;
-using NetMQ.zmq;
-using Poller = NetMQ.Poller;
 
-namespace SignalRSelfHost.Hubs.Ticker
+namespace SignalRSelfHost.Ticker
 {
     public class NetMQPublisher : ITickerPublisher
     {
         private const string PublishTicker = "P";
-        private const int Port = 10443;
+        private const int Port = 5263;
 
         public class ShimHandler : IShimHandler<object>
         {
@@ -29,8 +27,7 @@ namespace SignalRSelfHost.Hubs.Ticker
             public ShimHandler(NetMQContext context, ITickerRepository tickerRepository)
             {
                 this.context = context;
-                this.tickerRepository = tickerRepository;
-                
+                this.tickerRepository = tickerRepository;                
             }
 
             public void Initialise(object state)
@@ -85,9 +82,13 @@ namespace SignalRSelfHost.Hubs.Ticker
                         poller.Stop();
                         break;
                     case PublishTicker:
+                        string topic = e.Socket.ReceiveString();
                         string name = e.Socket.ReceiveString();
                         string price = e.Socket.ReceiveString();
-                        publisherSocket.SendMore(name).Send(price);
+                        publisherSocket.
+                            SendMore(topic).
+                            SendMore(name).
+                            Send(price);
                         break;
                 }
             }
@@ -96,13 +97,11 @@ namespace SignalRSelfHost.Hubs.Ticker
         private Actor<object> actor;
         private readonly NetMQContext context;
         private readonly ITickerRepository tickerRepository;
-        private Random rand;
-            
+                    
         public NetMQPublisher(NetMQContext context, ITickerRepository tickerRepository)
         {
             this.context = context;
-            this.tickerRepository = tickerRepository;
-            this.rand = new Random();
+            this.tickerRepository = tickerRepository;        
         }
 
         public void Start()
@@ -113,31 +112,15 @@ namespace SignalRSelfHost.Hubs.Ticker
         public void Stop()
         {
             actor.Dispose();
-        }
+        }        
 
-        public async Task SendOneManualFakeTicker()
+        public void PublishTrade(TickerDto ticker)
         {
-            var currentTicker = tickerRepository.GetNextTicker();
-
-            var flipPoint = rand.Next(0, 100);
-
-            if (flipPoint > 50)
-            {
-                currentTicker.Price += currentTicker.Price / 30;
-            }
-            else
-            {
-                currentTicker.Price -= currentTicker.Price / 30;
-            }
-
-            tickerRepository.StoreTicker(currentTicker);
-
-            Publish(currentTicker.Name, currentTicker.Price);
-        }
-
-        public void Publish(string name, decimal price)
-        {
-            actor.SendMore(PublishTicker).SendMore(name).SendMore(price.ToString());
+            actor.
+                SendMore(PublishTicker).
+                SendMore("Trades").
+                SendMore(ticker.Name).
+                Send(ticker.Price.ToString());
         }
     }
 }

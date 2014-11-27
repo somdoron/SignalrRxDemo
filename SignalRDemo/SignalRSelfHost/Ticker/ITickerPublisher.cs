@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 
-namespace SignalRSelfHost.Hubs.Ticker
+namespace SignalRSelfHost.Ticker
 {
     public interface ITickerPublisher
     {
         void Start();
         void Stop();
-        Task SendOneManualFakeTicker();
+        void PublishTrade(TickerDto ticker);        
     }
 }

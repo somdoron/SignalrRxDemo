@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 
-namespace SignalRSelfHost.Hubs.Ticker
+namespace SignalRSelfHost.Ticker
 {
    public class TickerRepository : ITickerRepository
     {
@@ -24,13 +24,10 @@ namespace SignalRSelfHost.Hubs.Ticker
            tickers.Enqueue(new TickerDto() {Name="Twitter", Price=120m});
        }
 
-
-
        public TickerDto GetNextTicker()
        {
            return tickers.Dequeue();
        }
-
 
         public void StoreTicker(TickerDto tickerInfo)
         {
