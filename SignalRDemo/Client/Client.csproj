@@ -48,6 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Blend.Interactivity.Wpf.1.0.1340.0\lib\net\Microsoft.Expression.Interactions.dll</HintPath>
     </Reference>
+    <Reference Include="NetMQ">
+      <HintPath>..\packages\NetMQ.3.3.0.11\lib\net40\NetMQ.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -87,20 +90,19 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Hub\NetMQClient.cs" />
+    <Compile Include="Hub\Transport\ConnectionInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Hub\Transport\ConnectionStatus.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Services\ConcurrencyService.cs" />
     <Compile Include="Services\IConcurrencyService.cs" />
     <Compile Include="Factory\ITickerFactory.cs" />
     <Compile Include="Factory\Ticker.cs" />
     <Compile Include="Factory\TickerFactory.cs" />
     <Compile Include="Hub\ITickerHubClient.cs" />
-    <Compile Include="Hub\ServiceClientBase.cs" />
-    <Compile Include="Hub\TickerHubClient.cs" />
-    <Compile Include="Hub\Transport\Connection.cs" />
-    <Compile Include="Hub\Transport\ConnectionInfo.cs" />
-    <Compile Include="Hub\Transport\ConnectionStatus.cs" />
-    <Compile Include="Hub\Transport\IConnection.cs" />
-    <Compile Include="Hub\Transport\ConnectionProvider.cs" />
-    <Compile Include="Hub\Transport\IConnectionProvider.cs" />
     <Compile Include="IOC\Bootstrapper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

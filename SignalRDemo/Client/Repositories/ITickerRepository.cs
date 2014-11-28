@@ -10,6 +10,6 @@ namespace Client.Repositories
 {
     public interface ITickerRepository
     {
-        IObservable<IEnumerable<Ticker>> GetTickerStream();
+        IObservable<Ticker> GetTickerStream();
     }
 }

@@ -39,7 +39,7 @@ namespace Client.ViewModels
             LoadTrades();
 
 
-           
+
         }
 
 
@@ -51,31 +51,34 @@ namespace Client.ViewModels
                             .ObserveOn(concurrencyService.Dispatcher)
                             .SubscribeOn(concurrencyService.TaskPool)
                             .Subscribe(
-                                AddTickers,
+                                AddTicker,
                                 ex => log.Error("An error occurred within the trade stream", ex));
         }
 
-        private void AddTickers(IEnumerable<Ticker> incomingTickers)
+        private void AddTicker(Ticker ticker)
         {
-            var allTickers = incomingTickers as IList<Ticker> ?? incomingTickers.ToList();
-            if (!allTickers.Any())
-            {
-                // empty list of trades means we are disconnected
-                stale = true;
-            }
-            else
-            {
-                if (stale)
-                {
-                    stale = false;
-                }
-            }
+            //var allTickers = incomingTickers as IList<Ticker> ?? incomingTickers.ToList();
+            //if (!allTickers.Any())
+            //{
+            //    // empty list of trades means we are disconnected
+            //    stale = true;
+            //}
+            //else
+            //{
+            //    if (stale)
+            //    {
+            //        stale = false;
+            //    }
+            //}
 
-            foreach (var ticker in allTickers)
-            {
-                Tickers.Single(x => x.Name == ticker.Name)
-                    .AcceptNewPrice(ticker.Price);
-            }
+            //foreach (var ticker in allTickers)
+            //{
+            //    Tickers.Single(x => x.Name == ticker.Name)
+            //        .AcceptNewPrice(ticker.Price);
+            //}
+
+            Tickers.Single(x => x.Name == ticker.Name)
+                 .AcceptNewPrice(ticker.Price);
         }
 
 
@@ -84,7 +87,7 @@ namespace Client.ViewModels
             foreach (var tickerViewModel in Tickers)
             {
                 tickerViewModel.Stale = stale;
-            }    
+            }
         }
 
 

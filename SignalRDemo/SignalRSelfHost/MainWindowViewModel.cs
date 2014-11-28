@@ -91,7 +91,7 @@ namespace SignalRSelfHost
 
         private void StopServer()
         {
-            tickerPublisher.Start();
+            tickerPublisher.Stop();
         }
     }
 }

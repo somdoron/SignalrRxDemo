@@ -9,6 +9,6 @@ namespace Client.Hub
 {
     internal interface ITickerHubClient
     {
-        IObservable<IEnumerable<TickerDto>> GetTickerStream();
+        IObservable<TickerDto> GetTickerStream();
     }
 }

@@ -16,18 +16,14 @@ namespace Client.Repositories
         {
             this.tickerHubClient = tickerHubClient;
             this.tickerFactory = tickerFactory;
-
-
-
-
-
         }
 
-        public IObservable<IEnumerable<Ticker>> GetTickerStream()
+        public IObservable<Ticker> GetTickerStream()
         {
             return Observable.Defer(() => tickerHubClient.GetTickerStream())
-                .Select(trades => trades.Select(tickerFactory.Create))
-                .Catch(Observable.Return(new Ticker[0]))
+                .Select(tickerFactory.Create)
+                // TODO: not sure what is this line doing
+                //.Catch(Observable.Return(new Ticker[0]))
                 .Repeat()
                 .Publish()
                 .RefCount();

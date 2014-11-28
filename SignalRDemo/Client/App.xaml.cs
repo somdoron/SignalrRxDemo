@@ -40,7 +40,7 @@ namespace Client
             var reactiveTraderApi = container.Resolve<IReactiveTrader>();
 
             var username = container.Resolve<IUserProvider>().Username;
-            reactiveTraderApi.Initialize(username, Common.ServiceConstants.Client.ServerAddress);
+            reactiveTraderApi.Initialize(username, "localhost");
 
             var mainWindow = container.Resolve<MainWindow>();
             //var vm = container.Resolve<MainWindowViewModel>();
@@ -52,44 +52,11 @@ namespace Client
 
         }
 
-
         private void InitializeLogging()
         {
             Thread.CurrentThread.Name = "UI";
             log4net.Config.XmlConfigurator.Configure();
             Log.Info(@"SignalRSelfHost started");
-        }
-
-
-
-        public async void StartHub()
-        {
-
-
-            var hubConnection = new HubConnection("http://localhost:5263/signalr");
-            IHubProxy tickerHubProxy = hubConnection.CreateHubProxy("TickerHub");
-
-            await hubConnection.Start();
-            SendSubscription(tickerHubProxy).Wait();
-
-
-
-            tickerHubProxy.On<IEnumerable<TickerDto>>("SendTickers", tickers =>
-            {
-                foreach (var ticker in tickers)
-                {
-                    Console.WriteLine("Stock update for '{0}' new price {1}", ticker.Name, ticker.Price);
-                }
-
-            });
-            
-        }
-
-
-        private static IObservable<Unit> SendSubscription(IHubProxy tickerHubProxy)
-        {
-            return Observable.FromAsync(() => tickerHubProxy.Invoke(ServiceConstants.Server.SubscribeTickers));
-        }
-            
+        }            
     }
 }

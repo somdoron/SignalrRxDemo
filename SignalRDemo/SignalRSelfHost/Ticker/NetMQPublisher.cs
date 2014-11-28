@@ -8,6 +8,7 @@ using NetMQ;
 using NetMQ.Actors;
 using NetMQ.InProcActors;
 using NetMQ.Sockets;
+using Newtonsoft.Json;
 
 namespace SignalRSelfHost.Ticker
 {
@@ -49,6 +50,7 @@ namespace SignalRSelfHost.Ticker
 
                 poller = new Poller();
                 poller.AddSocket(shim);
+                poller.AddSocket(snapshotSocket);
                 poller.Start();
             }
 
@@ -64,7 +66,7 @@ namespace SignalRSelfHost.Ticker
                     // we will send all the tickers in one message
                     foreach (var ticker in tickers)
                     {
-                        snapshotSocket.SendMore(ticker.Name).SendMore(ticker.Price.ToString());
+                        snapshotSocket.SendMore(JsonConvert.SerializeObject(ticker));
                     }
 
                     snapshotSocket.Send(SnapshotProtocol.EndOfTickers);
@@ -82,12 +84,10 @@ namespace SignalRSelfHost.Ticker
                         break;
                     case PublishTicker:
                         string topic = e.Socket.ReceiveString();
-                        string name = e.Socket.ReceiveString();
-                        string price = e.Socket.ReceiveString();
+                        string json = e.Socket.ReceiveString();                        
                         publisherSocket.
                             SendMore(topic).
-                            SendMore(name).
-                            Send(price);
+                            Send(json);
                         break;
                 }
             }
@@ -118,8 +118,7 @@ namespace SignalRSelfHost.Ticker
             actor.
                 SendMore(PublishTicker).
                 SendMore(StreamingProtocol.TradesTopic).
-                SendMore(ticker.Name).
-                Send(ticker.Price.ToString());
+                Send(JsonConvert.SerializeObject(ticker));                
         }
     }
 }
