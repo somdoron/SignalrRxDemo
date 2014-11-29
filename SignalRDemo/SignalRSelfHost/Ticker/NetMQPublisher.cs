@@ -8,7 +8,9 @@ using NetMQ;
 using NetMQ.Actors;
 using NetMQ.InProcActors;
 using NetMQ.Sockets;
+using NetMQ.zmq;
 using Newtonsoft.Json;
+using Poller = NetMQ.Poller;
 
 namespace SignalRSelfHost.Ticker
 {
@@ -22,7 +24,8 @@ namespace SignalRSelfHost.Ticker
             private PublisherSocket publisherSocket;
             private ResponseSocket snapshotSocket;
             private ITickerRepository tickerRepository;
-            private Poller poller;            
+            private Poller poller;
+            private NetMQTimer heartbeatTimer;
 
             public ShimHandler(NetMQContext context, ITickerRepository tickerRepository)
             {
@@ -46,15 +49,24 @@ namespace SignalRSelfHost.Ticker
                 
                 shim.ReceiveReady += OnShimReady;
 
+                heartbeatTimer = new NetMQTimer(StreamingProtocol.HeartbeatInterval);
+                heartbeatTimer.Elapsed += OnHeartbeatTimerElapsed;
+
                 shim.SignalOK();
 
                 poller = new Poller();
                 poller.AddSocket(shim);
                 poller.AddSocket(snapshotSocket);
+                poller.AddTimer(heartbeatTimer);
                 poller.Start();
 
                 publisherSocket.Dispose();
                 snapshotSocket.Dispose();
+            }
+
+            private void OnHeartbeatTimerElapsed(object sender, NetMQTimerEventArgs e)
+            {
+                publisherSocket.Send(StreamingProtocol.HeartbeatTopic);
             }
 
             private void OnSnapshotReady(object sender, NetMQSocketEventArgs e)

@@ -10,5 +10,8 @@ namespace Common
     {
         public const int Port = 5263;
         public const string TradesTopic = "Trades";
+        public const string HeartbeatTopic = "HB";
+        public static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(1);
+        public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(2);
     }
 }

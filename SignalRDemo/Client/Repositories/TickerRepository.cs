@@ -22,7 +22,7 @@ namespace Client.Repositories
         {
             return Observable.Defer(() => tickerHubClient.GetTickerStream())
                 .Select(tickerFactory.Create)                
-                //.Catch(Observable.Return(new Ticker[0]))
+                // .Catch(Observable.Return(new Ticker[0]))
                 .Repeat()
                 .Publish()
                 .RefCount();

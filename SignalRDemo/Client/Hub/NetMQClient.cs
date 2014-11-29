@@ -17,7 +17,7 @@ using Poller = NetMQ.Poller;
 
 namespace Client.Hub
 {
-    public class NetMQClient :  IDisposable
+    public class NetMQClient : IDisposable
     {
         private Actor<object> actor;
         private Subject<TickerDto> subject;
@@ -29,6 +29,7 @@ namespace Client.Hub
             private Subject<TickerDto> subject;
             private string address;
             private Poller poller;
+            private NetMQTimer timeoutTimer;
 
             public ShimHandler(NetMQContext context, Subject<TickerDto> subject, string address)
             {
@@ -39,7 +40,7 @@ namespace Client.Hub
 
             public void Initialise(object state)
             {
-                
+
             }
 
             public void RunPipeline(PairSocket shim)
@@ -47,6 +48,24 @@ namespace Client.Hub
                 // we should signal before running the poller but this will block the application
                 shim.SignalOK();
 
+                this.poller = new Poller();
+
+                shim.ReceiveReady += OnShimReady;
+                poller.AddSocket(shim);
+
+                timeoutTimer = new NetMQTimer(StreamingProtocol.Timeout);
+                timeoutTimer.Elapsed += TimeoutElapsed;
+                poller.AddTimer(timeoutTimer);
+
+                Connect();
+
+                poller.Start();
+
+                subscriberSocket.Dispose();
+            }
+
+            private void Connect()
+            {
                 // getting the snapshot
                 using (RequestSocket requestSocket = context.CreateRequestSocket())
                 {
@@ -67,18 +86,23 @@ namespace Client.Hub
 
                 subscriberSocket = context.CreateSubscriberSocket();
                 subscriberSocket.Subscribe(StreamingProtocol.TradesTopic);
+                subscriberSocket.Subscribe(StreamingProtocol.HeartbeatTopic);
                 subscriberSocket.Connect(string.Format("tcp://{0}:{1}", address, StreamingProtocol.Port));
                 subscriberSocket.ReceiveReady += OnSubscriberReady;
 
-                shim.ReceiveReady += OnShimReady;
+                poller.AddSocket(subscriberSocket);
 
-                this.poller = new Poller();
-                poller.AddSocket(shim);
-                poller.AddSocket(subscriberSocket);                
+                // reset timeout timer
+                timeoutTimer.Enable = false;
+                timeoutTimer.Enable = true;
+            }
 
-                poller.Start();
-
-                subscriberSocket.Dispose();
+            private void TimeoutElapsed(object sender, NetMQTimerEventArgs e)
+            {
+                // no need to reconnect, the client would be recreated because of RX
+                
+                // because of RX internal stuff invoking on the poller thread block the entire application, so calling on Thread Pool
+                Task.Run(() => subject.OnError(new Exception("Disconnected from server")));
             }
 
             private void OnShimReady(object sender, NetMQSocketEventArgs e)
@@ -94,9 +118,19 @@ namespace Client.Hub
             private void OnSubscriberReady(object sender, NetMQSocketEventArgs e)
             {
                 string topic = subscriberSocket.ReceiveString();
-                string json = subscriberSocket.ReceiveString();
 
-                PublishTicker(json);
+                if (topic == StreamingProtocol.TradesTopic)
+                {
+                    string json = subscriberSocket.ReceiveString();
+
+                    PublishTicker(json);
+                }
+                else if (topic == StreamingProtocol.HeartbeatTopic)
+                {
+                    // reset timeout timer
+                    timeoutTimer.Enable = false;
+                    timeoutTimer.Enable = true;
+                }
             }
 
             private void PublishTicker(string json)
