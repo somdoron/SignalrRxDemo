@@ -33,10 +33,12 @@ namespace Client.Services
             var concurrencyService = new ConcurrencyService();
             
             context = NetMQContext.Create();
-            client = new NetMQClient(context, server);
 
+            TickerHubClient tickerHubClient = new TickerHubClient(context, server);
+            
             var tickerFactory = new TickerFactory();
-            TickerRepository = new TickerRepository(client, tickerFactory);
+
+            TickerRepository = new TickerRepository(tickerHubClient, tickerFactory);
         }
 
         public ITickerRepository TickerRepository { get; private set; }

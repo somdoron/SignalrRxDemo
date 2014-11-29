@@ -17,7 +17,7 @@ using Poller = NetMQ.Poller;
 
 namespace Client.Hub
 {
-    public class NetMQClient : ITickerHubClient, IDisposable
+    public class NetMQClient :  IDisposable
     {
         private Actor<object> actor;
         private Subject<TickerDto> subject;
@@ -87,7 +87,7 @@ namespace Client.Hub
 
                 if (command == ActorKnownMessages.END_PIPE)
                 {
-                    poller.Stop();
+                    poller.Stop(false);
                 }
             }
 

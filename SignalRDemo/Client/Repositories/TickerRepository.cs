@@ -21,8 +21,7 @@ namespace Client.Repositories
         public IObservable<Ticker> GetTickerStream()
         {
             return Observable.Defer(() => tickerHubClient.GetTickerStream())
-                .Select(tickerFactory.Create)
-                // TODO: not sure what is this line doing
+                .Select(tickerFactory.Create)                
                 //.Catch(Observable.Return(new Ticker[0]))
                 .Repeat()
                 .Publish()

@@ -52,6 +52,9 @@ namespace SignalRSelfHost.Ticker
                 poller.AddSocket(shim);
                 poller.AddSocket(snapshotSocket);
                 poller.Start();
+
+                publisherSocket.Dispose();
+                snapshotSocket.Dispose();
             }
 
             private void OnSnapshotReady(object sender, NetMQSocketEventArgs e)
@@ -80,7 +83,7 @@ namespace SignalRSelfHost.Ticker
                 switch (command)
                 {
                     case ActorKnownMessages.END_PIPE:
-                        poller.Stop();
+                        poller.Stop(false);
                         break;
                     case PublishTicker:
                         string topic = e.Socket.ReceiveString();

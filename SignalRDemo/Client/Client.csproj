@@ -91,6 +91,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Hub\NetMQClient.cs" />
+    <Compile Include="Hub\TickerHubClient.cs" />
     <Compile Include="Hub\Transport\ConnectionInfo.cs">
       <SubType>Code</SubType>
     </Compile>
