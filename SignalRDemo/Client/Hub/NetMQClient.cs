@@ -79,7 +79,7 @@ namespace Client.Hub
 
                     string json;
 
-                    requestSocket.Options.ReceiveTimeout = TimeSpan.FromSeconds(10);
+                    requestSocket.Options.ReceiveTimeout = SnapshotProtocol.RequestTimeout;
 
                     try
                     {

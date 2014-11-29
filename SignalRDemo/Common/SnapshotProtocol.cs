@@ -11,5 +11,6 @@ namespace Common
         public const string GetTradessCommand = "GT";
         public const string EndOfTickers = "~~~EOT";
         public const int Port = 5264;
+        public static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
     }
 }
