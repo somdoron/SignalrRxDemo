@@ -61,7 +61,10 @@ namespace Client.Hub
 
                 poller.Start();
 
-                subscriberSocket.Dispose();
+                if (subscriberSocket != null)
+                {
+                    subscriberSocket.Dispose();
+                }                
             }
 
             private void Connect()
@@ -69,18 +72,32 @@ namespace Client.Hub
                 // getting the snapshot
                 using (RequestSocket requestSocket = context.CreateRequestSocket())
                 {
-                    // TODO: we might want to use time out or trying fetching the snapshot from multiple locations
+                    
                     requestSocket.Connect(string.Format("tcp://{0}:{1}", address, SnapshotProtocol.Port));
 
                     requestSocket.Send(SnapshotProtocol.GetTradessCommand);
 
-                    string json = requestSocket.ReceiveString();
+                    string json;
+
+                    requestSocket.Options.ReceiveTimeout = TimeSpan.FromSeconds(10);
+
+                    try
+                    {
+                        json = requestSocket.ReceiveString();
+                    }
+                    catch (AgainException ex)
+                    {
+                        // Fail to receive trades, we call on error and don't try to do anything with subscriber
+                        // calling on error from poller thread block the application
+                        Task.Run(() => subject.OnError(new Exception("No response from server")));
+                        return;
+                    }                    
 
                     while (json != SnapshotProtocol.EndOfTickers)
                     {
-                        PublishTicker(json);
+                        PublishTicker(json);                        
 
-                        json = requestSocket.ReceiveString();
+                        json = requestSocket.ReceiveString();                            
                     }
                 }
 
